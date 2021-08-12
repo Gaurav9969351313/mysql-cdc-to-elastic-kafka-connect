@@ -1,34 +1,27 @@
 version: '2'
 services:
-  mysql:
-    container_name: mysql
-    restart: always
-    image: mysql
+  kafkacat:
+    image: confluentinc/cp-kafkacat
+    depends_on:
+      - kafka1
+    command: "bash -c 'sleep infinity'"
+    volumes: 
+      - kafka-cat:/data
+
+  pg:
+    image: postgres
     environment:
-      MYSQL_ROOT_PASSWORD: 'admin' 
-      MYSQL_USER: 'admin'
-      # MYSQL_PASS: 'admin'
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=connectpoc
     volumes:
-      - mysql-volume:/var/lib/mysql
-    # image: mysql:5.7
-    # restart: always
-    # environment:
-    #   MYSQL_DATABASE: 'connectpoc'
-    #   MYSQL_USER: 'admin'
-    #   MYSQL_PASSWORD: 'admin'
-    #   MYSQL_ROOT_PASSWORD: 'admin'
-    # ports:
-    #   - '3306:3306'
-    # expose:
-    #   - '3306'
-    # volumes:
-    #   - my-db:/var/lib/mysql
+      - database-data:/var/lib/postgresql/data/ 
 
   adminer_container:
     image: adminer:latest
     environment: 
-        ADMINER_DEFAULT_SERVER: mysql
-        ADMINER_DESIGN: galkaev
+      ADMINER_DEFAULT_SERVER: mysql
+      ADMINER_DESIGN: galkaev
     ports: 
       - 8080:8080
 
@@ -237,6 +230,8 @@ volumes:
   mysql-volume:
   mq-jars:
   my-db:
+  kafka-cat:
+  database-data:
 
 # https://github.com/confluentinc/demo-scene/tree/master/ibm-demo
 
@@ -252,6 +247,7 @@ volumes:
 
 # http://localhost:9200/
 # http://localhost:5601/
+
 
 
 

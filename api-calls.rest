@@ -10,46 +10,59 @@ Content-Type: application/json
    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
     "connection.url": "http://elasticsearch:9200",
     "tasks.max": "1",
-    "topics": "simple.elasticsearch.data",
+    "topics": "pg-football_players",
     "name": "simple-elasticsearch-connector",
     "type.name": "_doc",
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
     "value.converter.schemas.enable": "false",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://kafka-schema-registry:8081",
     "schema.ignore": "true",
     "key.ignore": "true"
  }
 }
 
 ### Check Elastic Index Created Or Not
-GET http://localhost:9200/simple.elasticsearch.data/_search HTTP/1.1
+GET http://localhost:9200/pg-football_players/_search HTTP/1.1
 
-### Create Mysql JDBC Source Connector
+###Get All Indexes
+GET http://localhost:9200/_aliases?pretty=true HTTP/1.1
+
+### Create Postgres JDBC Source Connector
 POST {{baseurl}}/connectors HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "mysql_product_listings",
+  "name": "postgres_product_listings",
   "config": 
     {
-    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
-    "connection.url": "jdbc:mysql://localhost:3306/connectpoc",
-    "connection.user": "root",
-    "connection.password": "Qwerty$123",
-    "topic.prefix": "mysql-",
-    "mode": "incrementing",
-    "incrementing.column.name": "id",
-    "poll.interval.ms": 5000,
-    "tasks.max": 3,
-    "table.whitelist": "products"
+        "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+        "tasks.max": 1,
+        "connection.url": "jdbc:postgresql://pg:5432/connectpoc",
+        "connection.user": "root",
+        "connection.password": "admin",
+        "connection.attempts": "3",
+        "table.whitelist": "football_players",
+        "mode": "timestamp",
+        "timestamp.column.name":"modified_at,created_at",
+        "poll.interval.ms": "2000",
+        "topic.prefix": "pg-"
     }
 }
 
-jdbc:mysql://localhost:3306/connectpoc?user=root&password=admin&useUnicode=true&characterEncoding=UTF-8
+CREATE TABLE football_players (
+  name VARCHAR ( 50 ) PRIMARY KEY,
+  nationality VARCHAR ( 255 ) NOT NULL,
+  is_retired BOOLEAN DEFAULT false,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  modified_at TIMESTAMP
+  )
 
-### Create Table
-create table products (
-id INT auto_increment PRIMARY KEY,
-product_name VARCHAR(50),
-description VARCHAR(250),
-price DECIMAL(10, 2)
-);
+insert into football_players (name, nationality, is_retired) values ('Andrea Pirlo','Italian', true);
+insert into football_players (name, nationality, is_retired) values ('Cristiano Ronaldo','Portuguese', false);
+insert into football_players (name, nationality, is_retired) values ('Megan Rapinoe','American', true);
+
+insert into football_players (name, nationality, is_retired) values ('Andrea Pirlo sad','Italian', true);
+insert into football_players (name, nationality, is_retired) values ('Cristiano Ronaldo sdas','Portuguese', false);
+
+insert into football_players (name, nationality, is_retired) values ('Andrea Pirlo ad','Italian', true);
+insert into football_players (name, nationality, is_retired) values ('Cristiano Raldo sdas','Portuguese', false);

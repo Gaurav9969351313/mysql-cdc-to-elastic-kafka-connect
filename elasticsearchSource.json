@@ -1,8 +1,0 @@
-{
-    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
-    "type.name": "kafka-connect",
-    "topics": "mysql-test-poc.inventory.city",
-    "tasks.max": "1",
-    "connection.url": "http://elasticsearch:9200"
-    
-}
