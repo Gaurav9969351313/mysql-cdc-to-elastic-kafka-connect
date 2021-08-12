@@ -1,0 +1,55 @@
+### Create Elasticsearch Sink Connector 
+@baseurl=http://localhost:8083
+
+POST {{baseurl}}/connectors HTTP/1.1
+Content-Type: application/json
+
+{
+ "name": "simple-elasticsearch-connector",
+ "config": {
+   "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "connection.url": "http://elasticsearch:9200",
+    "tasks.max": "1",
+    "topics": "simple.elasticsearch.data",
+    "name": "simple-elasticsearch-connector",
+    "type.name": "_doc",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false",
+    "schema.ignore": "true",
+    "key.ignore": "true"
+ }
+}
+
+### Check Elastic Index Created Or Not
+GET http://localhost:9200/simple.elasticsearch.data/_search HTTP/1.1
+
+### Create Mysql JDBC Source Connector
+POST {{baseurl}}/connectors HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "mysql_product_listings",
+  "config": 
+    {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:mysql://localhost:3306/connectpoc",
+    "connection.user": "root",
+    "connection.password": "Qwerty$123",
+    "topic.prefix": "mysql-",
+    "mode": "incrementing",
+    "incrementing.column.name": "id",
+    "poll.interval.ms": 5000,
+    "tasks.max": 3,
+    "table.whitelist": "products"
+    }
+}
+
+jdbc:mysql://localhost:3306/connectpoc?user=root&password=admin&useUnicode=true&characterEncoding=UTF-8
+
+### Create Table
+create table products (
+id INT auto_increment PRIMARY KEY,
+product_name VARCHAR(50),
+description VARCHAR(250),
+price DECIMAL(10, 2)
+);
